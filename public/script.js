@@ -9,6 +9,7 @@ document.getElementById('combined_form').addEventListener('submit', function(eve
     const end_x = document.getElementById('end_x').value;
     const end_y = document.getElementById('end_y').value;
     const density = document.getElementById('density').value;
+    const history = document.getElementById('history').value;
 
     const l = parseInt(lines, 10);
     const c = parseInt(columns, 10);
@@ -17,22 +18,26 @@ document.getElementById('combined_form').addEventListener('submit', function(eve
     const ex = parseInt(end_x, 10);
     const ey = parseInt(end_y, 10);
     const d = parseInt(density, 10);
+    const h = parseInt(history, 10);
+    //const operatiunea = 100;
 
-    if (sx < 1 || sx > l) {
+    /*if (sx < 1 || sx > l) {
         alert(`Start X must be between 1 and ${l}.`);
 
         //return; // Stops the form from submitting if validation fails
-    }
+    }*/
 
     // Fac JSON object
     const user = {
+        //operatiunea: operatiunea,
+        density: d,
         lines: l,
         columns: c,
         start_x: sx,
         start_y: sy,
         end_x: ex,
         end_y: ey,
-        density: d
+        history: h,
     };
 
     const userJSON = JSON.stringify(user);
@@ -50,8 +55,51 @@ document.getElementById('combined_form').addEventListener('submit', function(eve
         .catch(error => console.error('Error:', error));
 });
 
+/*document.getElementById('ancient').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Set density as a number
+    // Extrag datele
+    const lines = document.getElementById('lines').value;
+    const columns = document.getElementById('columns').value;
+    const start_x = document.getElementById('start_x').value;
+    const start_y = document.getElementById('start_y').value;
+    const end_x = document.getElementById('end_x').value;
+    const end_y = document.getElementById('end_y').value;
+    const density = document.getElementById('density').value;
+
+    const l = parseInt(lines, 10);
+    const c = parseInt(columns, 10);
+    const sx = parseInt(start_x, 10);
+    const sy = parseInt(start_y, 10);
+    const ex = parseInt(end_x, 10);
+    const ey = parseInt(end_y, 10);
+    const d = parseInt(density, 10);
+
+    // Create JSON object
+    const user = {
+        density: density,
+    };
+
+    const userJSON = JSON.stringify(user);
+
+    // Send JSON to server
+    fetch('/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: userJSON
+    })
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+});*/
+
+
+
 // Function to fetch user data from the backend
-function fetchUserData() {
+/*function fetchUserData() {
     fetch('/userdata') // This is the endpoint you're calling
         .then(response => {
             if (!response.ok) {
@@ -83,4 +131,5 @@ function displayUserData(data) {
     output += `<p>Density: ${data.density}</p>`;
 
     displayDiv.innerHTML = output; // Update the display div with the data
-}
+}*/
+

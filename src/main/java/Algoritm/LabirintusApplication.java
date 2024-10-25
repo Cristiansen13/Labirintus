@@ -24,15 +24,21 @@ public class LabirintusApplication {
 	public static void main(String[] args) throws IOException, SQLException {
 		SpringApplication.run(LabirintusApplication.class, args);
 
+
+
 		// functie care se blocheaza pana cand am date
 		while (true) {
 			ReadAndRspond();
 		}
 	}
 
+	public static void StartNode()
+	{
+
+	}
+
 	public static boolean hasData() {
-		File file = new File("/home/mihai/IdeaProjects/Labirintus/userData.json");
-		System.out.println(file.exists());
+		File file = new File("userData.json");
 		return file.exists() && file.length() > 0;
 	}
 
@@ -43,7 +49,7 @@ public class LabirintusApplication {
 		JSONObject jsonObject = null;
 		while (jsonObject == null) {
 			try {
-				String content = new String(Files.readAllBytes(Paths.get("/home/mihai/IdeaProjects/Labirintus/userData.json")));
+				String content = new String(Files.readAllBytes(Paths.get("userData.json")));
 				jsonObject = new JSONObject(content);
 			} catch (Exception e) {
 				throw new IOException(e);
@@ -51,18 +57,17 @@ public class LabirintusApplication {
 		}
 
 		// preluare date
-		String str = jsonObject.get("density").toString();
-		if (str.charAt(0) != 'n') {
-			int density = jsonObject.getInt("density");
-			int width = jsonObject.getInt("lines");
-			int height = jsonObject.getInt("columns");
-			int startX = jsonObject.getInt("start_x");
-			int startY = jsonObject.getInt("start_y");
-			int endX = jsonObject.getInt("end_x");
-			int endY = jsonObject.getInt("end_y");
-
+		int history = jsonObject.getInt("history");
+		int density = jsonObject.getInt("density");
+		int width = jsonObject.getInt("lines");
+		int height = jsonObject.getInt("columns");
+		int startX = jsonObject.getInt("start_x");
+		int startY = jsonObject.getInt("start_y");
+		int endX = jsonObject.getInt("end_x");
+		int endY = jsonObject.getInt("end_y");
+		if (history == 0) {
 			// stergere date
-			File file = new File("/home/mihai/IdeaProjects/Labirintus/userData.json");
+			File file = new File("userData.json");
 			file.delete();
 
 			// generare labirint
@@ -95,7 +100,7 @@ public class LabirintusApplication {
 			labirintJson.put("matrix", matrixJsonArray);
 
 			// Scrie in fisier JSON-ul
-			String path = "/home/mihai/IdeaProjects/Labirintus/userDataResponse.json";
+			String path = "userDataResponse.json";
 			File resultFile = new File(path);
 			try {
 				resultFile.createNewFile();
@@ -112,8 +117,22 @@ public class LabirintusApplication {
 			// Trimite la baza de date
 			insertIntoDatabase(labirintJson.toString());
 		} else {
-			// Get the last labyrinth entry
-			String lastLabirint = getLastLabirintEntry();
+			String lastLabirint = getNthLastLabirintEntry(history);
+
+			// Scrie in fisier JSON-ul
+			String path = "userDataResponse.json";
+			File resultFile = new File(path);
+			try {
+				resultFile.createNewFile();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
+			try (PrintWriter writer = new PrintWriter(new FileWriter(path, false))) { // Set to true for append mode
+				writer.println(lastLabirint);
+			} catch (IOException e) {
+				throw new IOException(e);
+			}
 		}
 	}
 
@@ -127,26 +146,28 @@ public class LabirintusApplication {
 		try (Connection connection = DriverManager.getConnection(url, user, password);
 			 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-			preparedStatement.setString(1, labirintJsonString);  // Set labyrinth JSON in the query
+			preparedStatement.setString(1, labirintJsonString);
 			preparedStatement.executeUpdate();
-
-			System.out.println("Labyrinth data inserted successfully!");
 
 		} catch (SQLException e) {
 			throw new SQLException("Database insertion error: " + e.getMessage(), e);
 		}
 	}
 
-	private static String getLastLabirintEntry() throws SQLException {
+	private static String getNthLastLabirintEntry(int n) throws SQLException {
 		String url = "jdbc:mariadb://localhost:3306/harta";
 		String user = "minotaur";
 		String password = "123";
 
-		String query = "SELECT labirint FROM harta ORDER BY time DESC LIMIT 1";
+		String query = "SELECT labirint FROM harta ORDER BY time DESC LIMIT 1 OFFSET ?";
 
 		try (Connection connection = DriverManager.getConnection(url, user, password);
-			 PreparedStatement preparedStatement = connection.prepareStatement(query);
-			 ResultSet resultSet = preparedStatement.executeQuery()) {
+			 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+			// Set the OFFSET to position - 1 since it is 0-indexed
+			preparedStatement.setInt(1, n - 1);
+
+			ResultSet resultSet = preparedStatement.executeQuery();
 
 			if (resultSet.next()) {
 				return resultSet.getString("labirint");

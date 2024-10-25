@@ -6,6 +6,9 @@
     <title>Combined Form</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="script.js"></script>
+    <script src="script1.js"></script>
+    <link rel="stylesheet" type="text/css" href="style_labyrinth.css">
+    <script src="draw_labyrinth.js"></script>
 </head>
 <body>
 <h1>Input for Labyrinth</h1>
@@ -16,39 +19,48 @@
     <label for="lines">Number of lines:</label>
     <input type="number" id="lines" name="lines" min="10" max="100" required>
 
+
     <label for="columns">Number of columns:</label>
     <input type="number" id="columns" name="columns" min="10" max="100" required>
 
     <!-- Start Coordinates Section -->
-    <h2>Start Coordinates</h2>
+    <h2>Start Coordinates (from 0 to max len - 1 / max height - 1)</h2>
     <label for="start_x">x:</label>
-    <input type="number" id="start_x" name="start_x" min="1" required>
+    <input type="number" id="start_x" name="start_x" min="0" required>
 
     <label for="start_y">y:</label>
-    <input type="number" id="start_y" name="start_y" min="1" required>
+    <input type="number" id="start_y" name="start_y" min="0" required>
 
     <!-- End Coordinates Section -->
-    <h2>End Coordinates</h2>
+    <h2>End Coordinates (from 0 to max len - 1 / max height - 1)</h2>
     <label for="end_x">x:</label>
-    <input type="number" id="end_x" name="end_x" min="1" required>
+    <input type="number" id="end_x" name="end_x" min="0" required>
 
     <label for="end_y">y:</label>
-    <input type="number" id="end_y" name="end_y" min="1" required>
+    <input type="number" id="end_y" name="end_y" min="0" required>
 
     <!-- Wall Density Section -->
     <h2>Wall Density</h2>
     <label for="density">Enter the percentage of walls:</label>
     <input type="number" id="density" name="density" required min="0" max="40" step="1">
 
+    <h2>Get Labyrinth from History</h2>
+    <label for="history">History:</label>
+    <input type="number" id="history" name="history" min="0" required>
+
+
     <!-- Submit and Reset Buttons -->
     <button type="submit">Submit</button>
     <button type="reset">Reset</button>
 </form>
 
-<button id="fetch-data-button">Fetch Last Labyrinth</button> <!-- Button to fetch data -->
+<button id="fetch-data-button">Fetch Labyrinth</button> <!-- Button to fetch data -->
 
 <!-- Div to display fetched data -->
 <div id="data-display"></div> <!-- This div will show the fetched labyrinth data -->
+<!-- Add this below the existing data-display div -->
+<div id="labyrinth "></div> <!-- This div will display the labyrinth -->
+
 
 <script>
     document.getElementById('fetch-data-button').addEventListener('click', function() {
@@ -60,13 +72,14 @@
             .then(data => {
                 const displayDiv = document.getElementById('data-display');
                 displayDiv.innerHTML = `<h2>Labyrinth Data</h2>
-                                            <p>Lines: ${data.lines}</p>
-                                            <p>Columns: ${data.columns}</p>
-                                            <p>Start X: ${data.start_x}</p>
-                                            <p>Start Y: ${data.start_y}</p>
-                                            <p>End X: ${data.end_x}</p>
-                                            <p>End Y: ${data.end_y}</p>
-                                            <p>Density: ${data.density}</p>`;
+                                        <p>Start X: ${data.start_x}</p>
+                                        <p>Start Y: ${data.start_y}</p>
+                                        <p>End X: ${data.end_x}</p>
+                                        <p>End Y: ${data.end_y}</p>
+                                        <p>Columns: ${data.columns}</p>
+                                        <p>Lines: ${data.lines}</p>`;
+
+                renderLabyrinthMatrix(data);
             })
             .catch(error => console.error('Error fetching data:', error));
     });
