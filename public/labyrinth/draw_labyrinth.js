@@ -51,6 +51,7 @@ function generateLabyrinth() {
                     break;
                 }
                 default: {
+                    console.log("caca");
                     break;
                 }
             }
@@ -186,6 +187,8 @@ async function initLabyrinth() {
         rows = labyrinth_data.lines;
         columns = labyrinth_data.columns;
         matrix = labyrinth_data.matrix;
+
+        console.log(rows, columns, matrix);
 
         startTime = new Date();
         const labyrinth = generateLabyrinth();

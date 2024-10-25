@@ -66,8 +66,8 @@ public class LabirintusApplication {
 		// preluare date
 		int history = jsonObject.getInt("history");
 		int density = jsonObject.getInt("density");
-		int height = jsonObject.getInt("lines");
-		int width = jsonObject.getInt("columns");
+		int width = jsonObject.getInt("lines");
+		int height = jsonObject.getInt("columns");
 		int startY = jsonObject.getInt("start_x");
 		int startX = jsonObject.getInt("start_y");
 		int endY = jsonObject.getInt("end_x");
@@ -127,7 +127,7 @@ public class LabirintusApplication {
 			String lastLabirint = getNthLastLabirintEntry(history);
 
 			// Scrie in fisier JSON-ul
-			String path = "userDataResponse.json";
+			String path = "public/userDataResponse.json";
 			File resultFile = new File(path);
 			try {
 				resultFile.createNewFile();
