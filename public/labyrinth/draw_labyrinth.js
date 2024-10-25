@@ -1,7 +1,9 @@
-const LABYRINTH_CONFIG = {
-    rows: 8,
-    columns: 8,
-};
+// const LABYRINTH_CONFIG = {
+//     rows: 50,
+//     columns: 50,
+// };
+
+let start_x, start_y, end_x, end_y, rows, columns, matrix;
 
 const cellColors = {
     empty: "#e0e0e0",
@@ -12,9 +14,21 @@ const cellColors = {
     done: "#db9b07",
 };
 
-const { rows, columns } = LABYRINTH_CONFIG;
+// const { rows, columns } = LABYRINTH_CONFIG;
+
 let pathLength = 0;
 let startTime;
+
+function fetchJSONData(name) {
+    return fetch(name)
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .catch((error) => console.error("Unable to fetch data:", error));
+}
 
 function generateLabyrinth() {
     const labyrinth = [];
@@ -22,41 +36,67 @@ function generateLabyrinth() {
     for (let i = 0; i < rows; i++) {
         const row = [];
         for (let j = 0; j < columns; j++) {
-            if (i === 0 || i === rows - 1 || j === 0 || j === columns - 1) {
-                row.push("wall");
-            } else {
-                row.push("empty");
+            switch (matrix[i][j]) {
+                case 0: {
+                    row.push("empty");
+                    break;
+                }
+                case 1: {
+                    row.push("wall");
+                    break;
+                }
+                case 2: {
+                    row.push("empty");
+                    pathLength++;
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
         }
         labyrinth.push(row);
     }
 
-    labyrinth[1][1] = "start";
-    labyrinth[rows - 2][columns - 2] = "end";
+    labyrinth[start_x][start_y] = "start";
+    labyrinth[end_x][end_y] = "end";
 
     return labyrinth;
 }
 
 async function generatePath(labyrinth) {
-    let currentRow = 1;
-    let currentCol = 1;
+    let currentRow = start_x;
+    let currentCol = start_y;
+    let found = Array.from({ length: rows }, () => Array(columns).fill(false));
 
-    while (currentRow < rows - 2 || currentCol < columns - 2) {
-        await new Promise((resolve) => setTimeout(resolve, 30));
-
-        if (currentRow < rows - 2 && Math.random() < 0.5) {
-            currentRow++;
-        } else if (currentCol < columns - 2) {
-            currentCol++;
+    for (let i = 0; i < pathLength; i++) {
+        let x = currentRow;
+        let y = currentCol;
+        found[x][y] = true;
+        if (x + 1 < rows && !found[x + 1][y] && matrix[x + 1][y] === 2) {
+            found[x + 1][y] = true;
+            currentRow = x + 1;
+        } else if (
+            y + 1 < columns &&
+            !found[x][y + 1] &&
+            matrix[x][y + 1] === 2
+        ) {
+            found[x][y + 1] = true;
+            currentCol = y + 1;
+        } else if (x - 1 >= 0 && !found[x - 1][y] && matrix[x - 1][y] === 2) {
+            found[x - 1][y] = true;
+            currentRow = x - 1;
+        } else if (y - 1 >= 0 && !found[x][y - 1] && matrix[x][y - 1] === 2) {
+            found[x][y - 1] = true;
+            currentCol = y - 1;
         }
 
-        if (labyrinth[currentRow][currentCol] === "empty") {
-            labyrinth[currentRow][currentCol] = "path";
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        if (
+            labyrinth[currentRow][currentCol] !== "start" &&
+            labyrinth[currentRow][currentCol] !== "end"
+        ) {
             updateCell(currentRow, currentCol, "path");
-        }
-
-        if (currentRow === rows - 2 && currentCol === columns - 2) {
-            break;
         }
     }
 
@@ -78,6 +118,7 @@ async function generatePath(labyrinth) {
     }
 
     displayResults();
+    return pathLength;
 }
 
 function renderLabyrinth(labyrinth) {
@@ -106,7 +147,6 @@ function updateCell(row, col, type) {
 
 function resizeLabyrinth() {
     const labyrinthElement = document.getElementById("labyrinth");
-    const { rows, columns } = LABYRINTH_CONFIG;
     const aspectRatio = columns / rows;
 
     let width = window.innerWidth * 0.95;
@@ -134,12 +174,40 @@ function displayResults() {
 }
 
 async function initLabyrinth() {
-    startTime = new Date();
-    const labyrinth = generateLabyrinth();
-    renderLabyrinth(labyrinth);
-    resizeLabyrinth();
-    await generatePath(labyrinth);
+    try {
+        const labyrinth_data = await fetchJSONData("sample.json");
+        console.log(labyrinth_data);
+
+        // Initialize labyrinth variables
+        start_x = labyrinth_data.start_x;
+        start_y = labyrinth_data.start_y;
+        end_x = labyrinth_data.end_x;
+        end_y = labyrinth_data.end_y;
+        rows = labyrinth_data.lines;
+        columns = labyrinth_data.columns;
+        matrix = labyrinth_data.matrix;
+
+        startTime = new Date();
+        const labyrinth = generateLabyrinth();
+        renderLabyrinth(labyrinth);
+        resizeLabyrinth();
+        await generatePath(labyrinth);
+    } catch (error) {
+        console.error("Error initializing labyrinth:", error);
+    }
 }
 
 window.addEventListener("load", initLabyrinth);
 window.addEventListener("resize", resizeLabyrinth);
+
+async function toggleDiv(name) {
+    // Get random number between 2000 and 3000
+    const randomTime = Math.floor(Math.random() * 1000) + 2000;
+
+    // Show the div for that amount of time
+    await new Promise((resolve) => setTimeout(resolve, randomTime));
+
+    // Hide the div
+    const div = document.getElementById(name);
+    div.classList.toggle("hidden");
+}

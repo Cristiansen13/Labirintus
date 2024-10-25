@@ -24,7 +24,7 @@ public class LabirintusApplication {
 	public static void main(String[] args) throws IOException, SQLException {
 		SpringApplication.run(LabirintusApplication.class, args);
 
-
+		StartNode();
 
 		// functie care se blocheaza pana cand am date
 		while (true) {
@@ -34,7 +34,14 @@ public class LabirintusApplication {
 
 	public static void StartNode()
 	{
-
+		try{
+			ProcessBuilder processBuild = new ProcessBuilder("node", "server.js");
+			processBuild.inheritIO();
+			Process process = processBuild.start();
+		}
+		catch (IOException e){
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static boolean hasData() {
@@ -59,12 +66,12 @@ public class LabirintusApplication {
 		// preluare date
 		int history = jsonObject.getInt("history");
 		int density = jsonObject.getInt("density");
-		int width = jsonObject.getInt("lines");
-		int height = jsonObject.getInt("columns");
-		int startX = jsonObject.getInt("start_x");
-		int startY = jsonObject.getInt("start_y");
-		int endX = jsonObject.getInt("end_x");
-		int endY = jsonObject.getInt("end_y");
+		int height = jsonObject.getInt("lines");
+		int width = jsonObject.getInt("columns");
+		int startY = jsonObject.getInt("start_x");
+		int startX = jsonObject.getInt("start_y");
+		int endY = jsonObject.getInt("end_x");
+		int endX = jsonObject.getInt("end_y");
 		if (history == 0) {
 			// stergere date
 			File file = new File("userData.json");

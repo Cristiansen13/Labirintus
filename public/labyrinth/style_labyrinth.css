@@ -6,7 +6,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f0f0f0;
+    background-color: #d6e196;
     overflow: hidden;
 }
 #labyrinth {
@@ -14,15 +14,21 @@ body {
     gap: 1px;
     background-color: #ccc;
     padding: 1px;
-    max-width: 95vw;
-    max-height: 85vh;
+    max-width: 50vw;
+    max-height: 50vh;
+    border: 10px solid #552303;
 }
 .cell {
-    aspect-ratio: 1 / 1;
+    /* aspect-ratio: 1 / 1; */
+    border: 1px solid #bc4f1d;
 }
 #results {
     margin-top: 20px;
     font-family: Arial, sans-serif;
     font-size: 18px;
     text-align: center;
+}
+
+.container {
+    display: flex;
 }
