@@ -1,0 +1,28 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    overflow: hidden;
+}
+#labyrinth {
+    display: grid;
+    gap: 1px;
+    background-color: #ccc;
+    padding: 1px;
+    max-width: 95vw;
+    max-height: 85vh;
+}
+.cell {
+    aspect-ratio: 1 / 1;
+}
+#results {
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    text-align: center;
+}
