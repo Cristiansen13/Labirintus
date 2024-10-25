@@ -14,6 +14,7 @@ const cellColors = {
     done: "#db9b07",
 };
 
+const data_path = "/public/userDataResponse.json";
 // const { rows, columns } = LABYRINTH_CONFIG;
 
 let pathLength = 0;
@@ -176,7 +177,7 @@ function displayResults() {
 
 async function initLabyrinth() {
     try {
-        const labyrinth_data = await fetchJSONData("sample.json");
+        const labyrinth_data = await fetchJSONData(data_path);
         console.log(labyrinth_data);
 
         // Initialize labyrinth variables

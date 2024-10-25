@@ -42,6 +42,8 @@ document.getElementById('combined_form').addEventListener('submit', function(eve
 
     const userJSON = JSON.stringify(user);
 
+    document.getElementById('combined_form').reset();
+
     // Trimit JSON la server
     fetch('/', {
         method: 'POST',

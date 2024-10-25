@@ -107,7 +107,7 @@ public class LabirintusApplication {
 			labirintJson.put("matrix", matrixJsonArray);
 
 			// Scrie in fisier JSON-ul
-			String path = "userDataResponse.json";
+			String path = "public/userDataResponse.json";
 			File resultFile = new File(path);
 			try {
 				resultFile.createNewFile();
