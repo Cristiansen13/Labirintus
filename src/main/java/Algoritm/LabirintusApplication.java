@@ -17,29 +17,62 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SpringBootApplication
 public class LabirintusApplication {
 
+	private static final int THREAD_POOL_SIZE = 5;
+	private static ExecutorService executorService;
+	private static AtomicBoolean mainTaskFailed = new AtomicBoolean(false);
+
 	public static void main(String[] args) throws IOException, SQLException {
 		SpringApplication.run(LabirintusApplication.class, args);
 
+		// Initialize the thread pool
+		executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
 		StartNode();
 
-		// functie care se blocheaza pana cand am date
-		while (true) {
-			ReadAndRspond();
-		}
+		// Submit the ReadAndRespond task to the thread pool
+		submitReadAndRespondTask();
+
+		// Add a shutdown hook to properly shut down the thread pool
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				executorService.shutdown();
+				if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+					executorService.shutdownNow();
+				}
+			} catch (InterruptedException e) {
+				executorService.shutdownNow();
+			}
+		}));
 	}
 
-	public static void StartNode()
-	{
-		try{
+	private static void submitReadAndRespondTask() {
+		executorService.submit(() -> {
+			try {
+				while (true) {
+					ReadAndRespond();
+				}
+			} catch (IOException | SQLException e) {
+				e.printStackTrace();
+				mainTaskFailed.set(true);
+				submitReadAndRespondTask(); // Resubmit the task if it fails
+			}
+		});
+	}
+
+	public static void StartNode() {
+		try {
 			ProcessBuilder processBuild = new ProcessBuilder("node", "server.js");
 			processBuild.inheritIO();
 			Process process = processBuild.start();
-		}
-		catch (IOException e){
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -49,10 +82,10 @@ public class LabirintusApplication {
 		return file.exists() && file.length() > 0;
 	}
 
-	public static void ReadAndRspond() throws IOException, SQLException {
+	public static void ReadAndRespond() throws IOException, SQLException {
 		while (!hasData());
 
-		// citire date din json
+		// Read data from JSON
 		JSONObject jsonObject = null;
 		while (jsonObject == null) {
 			try {
@@ -63,7 +96,7 @@ public class LabirintusApplication {
 			}
 		}
 
-		// preluare date
+		// Extract data
 		int history = jsonObject.getInt("history");
 		int density = jsonObject.getInt("density");
 		int width = jsonObject.getInt("lines");
@@ -72,12 +105,13 @@ public class LabirintusApplication {
 		int startX = jsonObject.getInt("start_y");
 		int endY = jsonObject.getInt("end_x");
 		int endX = jsonObject.getInt("end_y");
+
 		if (history == 0) {
-			// stergere date
+			// Delete data
 			File file = new File("userData.json");
 			file.delete();
 
-			// generare labirint
+			// Generate labyrinth
 			Labirint labirint = null;
 			while (labirint == null) {
 				try {
@@ -87,7 +121,7 @@ public class LabirintusApplication {
 				}
 			}
 
-			// creare JSON cu labirintul
+			// Create JSON with labyrinth
 			JSONObject labirintJson = new JSONObject();
 			labirintJson.put("lines", height);
 			labirintJson.put("columns", width);
@@ -106,7 +140,7 @@ public class LabirintusApplication {
 			}
 			labirintJson.put("matrix", matrixJsonArray);
 
-			// Scrie in fisier JSON-ul
+			// Write JSON to file
 			String path = "public/userDataResponse.json";
 			File resultFile = new File(path);
 			try {
@@ -115,18 +149,18 @@ public class LabirintusApplication {
 				throw new RuntimeException(e);
 			}
 
-			try (PrintWriter writer = new PrintWriter(new FileWriter(path, false))) { // Set to true for append mode
+			try (PrintWriter writer = new PrintWriter(new FileWriter(path, false))) {
 				writer.println(labirintJson.toString());
 			} catch (IOException e) {
 				throw new IOException(e);
 			}
 
-			// Trimite la baza de date
+			// Send to database
 			insertIntoDatabase(labirintJson.toString());
 		} else {
 			String lastLabirint = getNthLastLabirintEntry(history);
 
-			// Scrie in fisier JSON-ul
+			// Write JSON to file
 			String path = "public/userDataResponse.json";
 			File resultFile = new File(path);
 			try {
@@ -135,7 +169,7 @@ public class LabirintusApplication {
 				throw new RuntimeException(e);
 			}
 
-			try (PrintWriter writer = new PrintWriter(new FileWriter(path, false))) { // Set to true for append mode
+			try (PrintWriter writer = new PrintWriter(new FileWriter(path, false))) {
 				writer.println(lastLabirint);
 			} catch (IOException e) {
 				throw new IOException(e);
@@ -171,7 +205,6 @@ public class LabirintusApplication {
 		try (Connection connection = DriverManager.getConnection(url, user, password);
 			 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-			// Set the OFFSET to position - 1 since it is 0-indexed
 			preparedStatement.setInt(1, n - 1);
 
 			ResultSet resultSet = preparedStatement.executeQuery();
@@ -184,5 +217,4 @@ public class LabirintusApplication {
 		}
 		return null;
 	}
-
 }
