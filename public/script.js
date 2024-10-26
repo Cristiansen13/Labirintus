@@ -1,61 +1,58 @@
-document.getElementById('combined_form').addEventListener('submit', function(event) {
-    event.preventDefault();
+document
+    .getElementById("combined_form")
+    .addEventListener("submit", function (event) {
+        event.preventDefault();
 
-    // Extrag datele
-    const lines = document.getElementById('lines').value;
-    const columns = document.getElementById('columns').value;
-    const start_x = document.getElementById('start_x').value;
-    const start_y = document.getElementById('start_y').value;
-    const end_x = document.getElementById('end_x').value;
-    const end_y = document.getElementById('end_y').value;
-    const density = document.getElementById('density').value;
-    const history = document.getElementById('history').value;
+        // Extrag datele
+        const lines = document.getElementById("lines").value;
+        const columns = document.getElementById("columns").value;
+        const start_x = document.getElementById("start_x").value;
+        const start_y = document.getElementById("start_y").value;
+        const end_x = document.getElementById("end_x").value;
+        const end_y = document.getElementById("end_y").value;
+        const density = document.getElementById("density").value;
+        const history = document.getElementById("history").value;
+        document.getElementById("history").value = 0;
 
-    const l = parseInt(lines, 10);
-    const c = parseInt(columns, 10);
-    const sx = parseInt(start_x, 10);
-    const sy = parseInt(start_y, 10);
-    const ex = parseInt(end_x, 10);
-    const ey = parseInt(end_y, 10);
-    const d = parseInt(density, 10);
-    const h = parseInt(history, 10);
-    //const operatiunea = 100;
+        const l = parseInt(lines, 10);
+        const c = parseInt(columns, 10);
+        const sx = parseInt(start_x, 10);
+        const sy = parseInt(start_y, 10);
+        const ex = parseInt(end_x, 10);
+        const ey = parseInt(end_y, 10);
+        const d = parseInt(density, 10);
+        const h = parseInt(history, 10);
+        //const operatiunea = 100;
 
-    /*if (sx < 1 || sx > l) {
-        alert(`Start X must be between 1 and ${l}.`);
+        // Fac JSON object
+        const user = {
+            //operatiunea: operatiunea,
+            density: d,
+            lines: l,
+            columns: c,
+            start_x: sx,
+            start_y: sy,
+            end_x: ex,
+            end_y: ey,
+            history: h,
+        };
 
-        //return; // Stops the form from submitting if validation fails
-    }*/
+        const userJSON = JSON.stringify(user);
 
-    // Fac JSON object
-    const user = {
-        //operatiunea: operatiunea,
-        density: d,
-        lines: l,
-        columns: c,
-        start_x: sx,
-        start_y: sy,
-        end_x: ex,
-        end_y: ey,
-        history: h,
-    };
+        document.getElementById('combined_form').reset();
 
-    const userJSON = JSON.stringify(user);
-
-    document.getElementById('combined_form').reset();
-
-    // Trimit JSON la server
-    fetch('/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: userJSON
-    })
-        .then(response => response.text())
-        .then(data => console.log(data))
-        .catch(error => console.error('Error:', error));
-});
+        // Trimit JSON la server
+        fetch("/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: userJSON,
+        })
+            .then((response) => response.text())
+            .then((data) => console.log(data))
+            .catch((error) => console.error("Error:", error));
+    });
 
 /*document.getElementById('ancient').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -98,8 +95,6 @@ document.getElementById('combined_form').addEventListener('submit', function(eve
         .catch(error => console.error('Error:', error));
 });*/
 
-
-
 // Function to fetch user data from the backend
 /*function fetchUserData() {
     fetch('/userdata') // This is the endpoint you're calling
@@ -135,3 +130,27 @@ function displayUserData(data) {
     displayDiv.innerHTML = output; // Update the display div with the data
 }*/
 
+// function setRandomValues() {
+//     console.log("Setting random values");
+//
+//     const rand_lines = Math.floor(Math.random() * 91) + 10;
+//     document.getElementById("lines").value = rand_lines;
+//
+//     const rand_columns = Math.floor(Math.random() * 91) + 10;
+//     document.getElementById("columns").value = rand_columns;
+//
+//     const rand_start_x = Math.floor(Math.random() * rand_lines);
+//     document.getElementById("start_x").value = rand_start_x;
+//
+//     const rand_start_y = Math.floor(Math.random() * rand_columns);
+//     document.getElementById("start_y").value = rand_start_y;
+//
+//     const rand_end_x = Math.floor(Math.random() * rand_lines);
+//     document.getElementById("end_x").value = rand_end_x;
+//
+//     const rand_end_y = Math.floor(Math.random() * rand_columns);
+//     document.getElementById("end_y").value = rand_end_y;
+//
+//     const rand_density = Math.floor(Math.random() * 41);
+//     document.getElementById("density").value = rand_density;
+// }

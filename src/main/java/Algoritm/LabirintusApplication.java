@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SpringBootApplication
 public class LabirintusApplication {
 
-	private static final int THREAD_POOL_SIZE = 5;
+	private static final int THREAD_POOL_SIZE = 10;
 	private static ExecutorService executorService;
 	private static AtomicBoolean mainTaskFailed = new AtomicBoolean(false);
 
